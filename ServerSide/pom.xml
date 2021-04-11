@@ -14,6 +14,11 @@
     <version>1.0-SNAPSHOT</version>
     <artifactId>ServerSide</artifactId>
 
+    <properties>
+        <spring.boot.version>2.4.3</spring.boot.version>
+        <lombok.version>1.18.20</lombok.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -35,9 +40,9 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
