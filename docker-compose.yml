@@ -1,0 +1,19 @@
+version: '3.8'
+
+volumes:
+  pg_data:
+
+services:
+  database:
+    container_name: letter_db
+    image: postgres:13.1
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: letter_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - pg_data:/var/lib/postgresql/data/
