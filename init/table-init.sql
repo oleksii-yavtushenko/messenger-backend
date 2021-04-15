@@ -25,8 +25,8 @@ create table message
     sender_id int not null constraint message_sender_id_fk references "user" (id),
     recipient_id int constraint message_recipient_id_fk references "user" (id),
     message_text text not null,
-    create_time timestamp default CURRENT_TIMESTAMP not null,
-    modify_time timestamp,
+    create_time timestamp with TIME ZONE default CURRENT_TIMESTAMP not null,
+    modify_time timestamp with TIME ZONE,
     is_read boolean default false,
     status status default 'DELAYED'
 );
@@ -37,7 +37,7 @@ create table online
     user_id int not null
         constraint online_user_id___fk
             references "user" (id),
-    last_online_time timestamp default CURRENT_TIMESTAMP,
+    last_online_time timestamp with TIME ZONE default CURRENT_TIMESTAMP,
     is_online boolean default false not null
 );
 
