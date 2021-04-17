@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "online")
+@Table(name = "online_status")
 @Data
 @Builder
 @ToString

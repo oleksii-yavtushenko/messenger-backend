@@ -34,7 +34,7 @@ create table message
 );
 
 -- CREATE TABLE: online
-create table online
+create table online_status
 (
     user_id int not null
         constraint online_user_id___fk
@@ -44,9 +44,9 @@ create table online
 );
 
 create unique index online_user_id_uindex
-  on online (user_id);
+  on online_status (user_id);
 
-alter table online
+alter table online_status
     add constraint online_pk
         primary key (user_id);
 
@@ -73,10 +73,10 @@ values
 
 commit;
 
--- INSERT INTO: online
+-- INSERT INTO: online_status
 start transaction;
 
-insert into online(user_id, last_online_time, is_online)
+insert into online_status(user_id, last_online_time, is_online)
 values (1, '2021-04-17 12:55:04+03'::timestamptz, false),
        (2, '2021-04-17 12:56:56+03'::timestamptz, false);
 
