@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -17,7 +18,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @TypeDef(name = "status", typeClass = Status.class)
-public class MessageEntity {
+public class MessageEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +32,7 @@ public class MessageEntity {
     @JoinColumn(referencedColumnName = "id", nullable = false)
     private UserEntity recipient;
 
-    private String message;
+    private String messageText;
 
     @CreationTimestamp
     private OffsetDateTime createTime;
@@ -41,6 +42,5 @@ public class MessageEntity {
     private Boolean isRead;
 
     @Enumerated(EnumType.STRING)
-    @Type(type = "status")
     private Status status;
 }
