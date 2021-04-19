@@ -19,8 +19,7 @@ public class UserEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @PrimaryKeyJoinColumn(referencedColumnName = "user_id")
+    @OneToOne(mappedBy = "user")
     private OnlineStatusEntity onlineStatus;
 
     private String login;
