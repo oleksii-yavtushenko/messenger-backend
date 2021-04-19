@@ -16,5 +16,5 @@ public interface MessageRepository extends CrudRepository<MessageEntity, Long> {
     @Query( "SELECT message FROM MessageEntity message " +
             "WHERE (message.sender= ?1 AND message.recipient = ?2) OR (message.sender = ?2 AND message.recipient = ?1) " +
             "ORDER BY message.createTime")
-    List<MessageEntity> findMessagesFromUsers(UserEntity firstUser, UserEntity secondUser);
+    List<MessageEntity> findAllByUsers(UserEntity firstUser, UserEntity secondUser);
 }

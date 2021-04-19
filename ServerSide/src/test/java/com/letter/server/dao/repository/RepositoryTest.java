@@ -29,7 +29,7 @@ public class RepositoryTest {
         System.out.println(secondUser.getOnlineStatus());
 
 
-        List<MessageEntity> messages = messageRepository.findMessagesFromUsers(firstUser, secondUser);
+        List<MessageEntity> messages = messageRepository.findAllByUsers(firstUser, secondUser);
 
         messages.forEach(System.out::println);
 
