@@ -26,12 +26,7 @@ public class RepositoryTest {
         UserEntity firstUser = userRepository.findById(1L).orElseThrow(IllegalArgumentException::new);
         UserEntity secondUser = userRepository.findById(2L).orElseThrow(IllegalArgumentException::new);
 
-        System.out.println(secondUser.getOnlineStatus());
-
-
         List<MessageEntity> messages = messageRepository.findAllByUsers(firstUser, secondUser);
-
-        messages.forEach(System.out::println);
 
         Assertions.assertNotNull(messages);
         Assertions.assertNotEquals(messages.size(), 0);
