@@ -2,9 +2,8 @@ package com.letter.server.dao.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -15,10 +14,10 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class OnlineStatusEntity {
+public class OnlineStatusEntity implements Serializable {
 
     @Id
-    private Long userId;
+    private Long id;
 
     private OffsetDateTime lastOnlineTime;
 

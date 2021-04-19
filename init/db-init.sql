@@ -1,16 +1,16 @@
 CREATE ROLE postgres WITH LOGIN ENCRYPTED PASSWORD '';
 
 -- CREATE TABLE: user
-create table "user"
+create table "user_entity"
 (
-    id serial not null constraint user_pk primary key,
+    id serial not null constraint user_entity_pk primary key,
     login varchar(64) not null,
     password varchar(64) not null,
     email varchar(64)
 );
 
-create unique index user_login_uindex
-    on "user" (login);
+create unique index user_entity_login_uindex
+    on "user_entity" (login);
 
 -- CREATE TYPE: status
 create type status as ENUM
@@ -24,8 +24,8 @@ create table message
     id serial not null
         constraint message_pk
             primary key,
-    sender_id int not null constraint message_sender_id_fk references "user" (id),
-    recipient_id int constraint message_recipient_id_fk references "user" (id),
+    sender_id int not null constraint message_sender_id_fk references "user_entity" (id),
+    recipient_id int constraint message_recipient_id_fk references "user_entity" (id),
     message_text text not null,
     create_time timestamp with TIME ZONE default CURRENT_TIMESTAMP not null,
     modify_time timestamp with TIME ZONE,
@@ -36,25 +36,22 @@ create table message
 -- CREATE TABLE: online
 create table online_status
 (
+    id int not null constraint online_pk primary key,
     user_id int not null
-        constraint online_user_id___fk
-            references "user" (id),
+        constraint online_user_entity_id___fk
+            references "user_entity" (id),
     last_online_time timestamp with TIME ZONE default CURRENT_TIMESTAMP,
     is_online boolean default false not null
 );
 
-create unique index online_user_id_uindex
+create unique index online_user_entity_id_uindex
   on online_status (user_id);
-
-alter table online_status
-    add constraint online_pk
-        primary key (user_id);
 
 
 -- INSERT INTO: user
 start transaction;
 
-insert into "user" (id, login, password, email)
+insert into "user_entity" (id, login, password, email)
 values
 (1, 'coolboy', 'booy', 'dumb_email@mail.com'),
 (2, 'coolgirl', 'giirl', 'normal_mail@mail.com'),
@@ -76,9 +73,9 @@ commit;
 -- INSERT INTO: online_status
 start transaction;
 
-insert into online_status(user_id, last_online_time, is_online)
-values (1, '2021-04-17 12:55:04+03'::timestamptz, false),
-       (2, '2021-04-17 12:56:56+03'::timestamptz, false);
+insert into online_status(id, user_id, last_online_time, is_online)
+values (1, 1, '2021-04-17 12:55:04+03'::timestamptz, false),
+       (2, 2, '2021-04-17 12:56:56+03'::timestamptz, false);
 
 commit;
 
