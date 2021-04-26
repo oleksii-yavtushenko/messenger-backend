@@ -13,7 +13,7 @@ public class OnlineStatusValidator implements Validator<OnlineStatusDto> {
             throw new ValidationException("OnlineStatusDto object cannot be null");
         }
 
-        if (dto.getIsOnline() == null && dto.getUserId() == null) {
+        if (dto.getUserId() == null) {
             throw new ValidationException("OnlineStatusDto object's fields cannot be null, userId=" + dto.getUserId());
         }
     }

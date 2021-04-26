@@ -36,15 +36,27 @@ public class OnlineStatusService {
 
         validator.validateId(onlineStatusDto);
 
-        OnlineStatusEntity onlineStatusEntity;
+        try {
+            OnlineStatusEntity onlineStatusEntity = onlineStatusRepository.findById(onlineStatusDto.getId()).orElseThrow(EntityNotFoundException::new);
+
+            return onlineStatusMapper.onlineStatusEntityToDto(onlineStatusEntity);
+        } catch (Exception ex) {
+            throw new ServiceException("Exception while finding onlineStatusEntity with id=" + onlineStatusDto.getId(), ex);
+        }
+    }
+
+    public OnlineStatusDto findByUserId(OnlineStatusDto onlineStatusDto) throws ServiceException {
+
+        validator.validate(onlineStatusDto);
 
         try {
-            onlineStatusEntity = onlineStatusRepository.findById(onlineStatusDto.getId()).orElseThrow(EntityNotFoundException::new);
+            OnlineStatusEntity onlineStatusEntity = onlineStatusRepository.findByUserId(onlineStatusDto.getUserId());
+
+            return onlineStatusMapper.onlineStatusEntityToDto(onlineStatusEntity);
         } catch (Exception ex) {
             throw new ServiceException("Exception while finding onlineStatusEntity with userId=" + onlineStatusDto.getUserId(), ex);
         }
 
-        return onlineStatusMapper.onlineStatusEntityToDto(onlineStatusEntity);
     }
 
     public OnlineStatusDto save(OnlineStatusDto onlineStatusDto) throws ServiceException {
@@ -67,12 +79,12 @@ public class OnlineStatusService {
 
     public OnlineStatusDto edit(OnlineStatusDto onlineStatusDto) throws ServiceException {
 
-        validator.validateId(onlineStatusDto);
+        validator.validate(onlineStatusDto);
 
         OnlineStatusDto responseDto;
 
         try {
-            OnlineStatusEntity onlineStatusEntity =  onlineStatusRepository.findById(onlineStatusDto.getId()).orElseThrow(EntityNotFoundException::new);
+            OnlineStatusEntity onlineStatusEntity =  onlineStatusRepository.findByUserId(onlineStatusDto.getUserId());
 
             OnlineStatusEntity responseEntity = onlineStatusMapper.editOnlineStatusDtoToEntity(onlineStatusEntity, onlineStatusDto);
             responseEntity = onlineStatusRepository.save(responseEntity);
@@ -87,10 +99,10 @@ public class OnlineStatusService {
 
     public void delete(OnlineStatusDto onlineStatusDto) throws ServiceException {
 
-        validator.validateId(onlineStatusDto);
+        validator.validate(onlineStatusDto);
 
         try {
-            OnlineStatusEntity entity = onlineStatusMapper.onlineStatusDtoToEntity(onlineStatusDto);
+            OnlineStatusEntity entity =  onlineStatusRepository.findByUserId(onlineStatusDto.getUserId());
 
             onlineStatusRepository.delete(entity);
         } catch (Exception ex) {

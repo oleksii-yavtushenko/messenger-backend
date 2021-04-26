@@ -36,7 +36,7 @@ create table message
 -- CREATE TABLE: online
 create table online_status
 (
-    id int not null constraint online_pk primary key,
+    id serial not null constraint online_pk primary key,
     user_id int not null
         constraint online_user_entity_id___fk
             references "user_entity" (id),

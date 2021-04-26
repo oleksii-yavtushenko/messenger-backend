@@ -1,7 +1,6 @@
 package com.letter.server.mapper;
 
 import com.letter.server.dao.entity.OnlineStatusEntity;
-import com.letter.server.dao.entity.UserEntity;
 import com.letter.server.dto.OnlineStatusDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,7 +21,7 @@ public interface OnlineStatusMapper {
         OnlineStatusEntity mappedEntity = new OnlineStatusEntity();
 
         mappedEntity.setId(onlineStatusEntity.getId());
-        mappedEntity.setUser(onlineStatusDto.getUserId() != null ? UserEntity.builder().id(onlineStatusDto.getId()).build() : onlineStatusEntity.getUser());
+        mappedEntity.setUser(onlineStatusEntity.getUser());
         mappedEntity.setIsOnline(onlineStatusDto.getIsOnline() != null ? onlineStatusDto.getIsOnline() : onlineStatusEntity.getIsOnline());
         mappedEntity.setLastOnlineTime(onlineStatusDto.getLastOnlineTime() != null ? onlineStatusDto.getLastOnlineTime() : onlineStatusEntity.getLastOnlineTime());
 
