@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MessageValidator implements Validator<MessageDto> {
+
     @Override
     public void validate(MessageDto dto) throws ValidationException {
         if (dto != null && dto.getMessageText() != null && dto.getRecipient() != null && dto.getSender() != null) {

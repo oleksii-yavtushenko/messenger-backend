@@ -33,6 +33,7 @@ public class OnlineStatusService {
     }
 
     public OnlineStatusDto findById(OnlineStatusDto onlineStatusDto) throws ServiceException {
+
         validator.validateId(onlineStatusDto);
 
         OnlineStatusEntity onlineStatusEntity;
@@ -47,6 +48,7 @@ public class OnlineStatusService {
     }
 
     public OnlineStatusDto save(OnlineStatusDto onlineStatusDto) throws ServiceException {
+
         validator.validate(onlineStatusDto);
 
         OnlineStatusDto response;
@@ -64,6 +66,7 @@ public class OnlineStatusService {
 
 
     public OnlineStatusDto edit(OnlineStatusDto onlineStatusDto) throws ServiceException {
+
         validator.validateId(onlineStatusDto);
 
         OnlineStatusDto responseDto;
@@ -83,6 +86,7 @@ public class OnlineStatusService {
     }
 
     public void delete(OnlineStatusDto onlineStatusDto) throws ServiceException {
+
         validator.validateId(onlineStatusDto);
 
         try {

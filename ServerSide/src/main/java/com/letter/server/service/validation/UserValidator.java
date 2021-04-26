@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserValidator implements Validator<UserDto> {
+
     @Override
     public void validate(UserDto dto) throws ValidationException {
         if (dto == null) {

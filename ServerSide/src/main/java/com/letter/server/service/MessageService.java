@@ -27,15 +27,16 @@ public class MessageService {
 
     private final MessageMapper messageMapper;
 
-    private final Validator<MessageDto> messageValidator;
+    private final UserMapper userMapper;
 
     private final UserService userService;
 
-    private final UserMapper userMapper;
+    private final Validator<MessageDto> messageValidator;
 
     private final Validator<UserDto> userValidator;
 
     public List<MessageDto> findAllByTwoUsers(UserDto firstUserDto, UserDto secondUserDto) throws ServiceException {
+
         userValidator.validateId(firstUserDto);
         userValidator.validateId(secondUserDto);
 
@@ -61,7 +62,8 @@ public class MessageService {
         return responseList;
     }
 
-    public MessageDto sendMessage(MessageDto messageDto) throws ServiceException {
+    public MessageDto send(MessageDto messageDto) throws ServiceException {
+
         messageValidator.validate(messageDto);
 
         MessageDto response;
@@ -80,7 +82,8 @@ public class MessageService {
         return response;
     }
 
-    public MessageDto readMessage(MessageDto messageDto) throws ServiceException {
+    public MessageDto read(MessageDto messageDto) throws ServiceException {
+
         messageValidator.validate(messageDto);
 
         MessageDto response;
@@ -99,7 +102,8 @@ public class MessageService {
         return response;
     }
 
-    public MessageDto editMessage(MessageDto messageDto) throws ServiceException {
+    public MessageDto edit(MessageDto messageDto) throws ServiceException {
+
         messageValidator.validate(messageDto);
 
         MessageDto response;
@@ -120,6 +124,7 @@ public class MessageService {
     }
 
     public void delete(MessageDto messageDto) throws ServiceException {
+
         messageValidator.validate(messageDto);
 
         try {

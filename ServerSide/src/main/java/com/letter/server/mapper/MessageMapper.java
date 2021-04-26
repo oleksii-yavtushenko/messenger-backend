@@ -4,9 +4,12 @@ import com.letter.server.dao.entity.MessageEntity;
 import com.letter.server.dao.entity.Status;
 import com.letter.server.dto.MessageDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", uses = UserMapper.class)
 public interface MessageMapper {
+
+    MessageMapper INSTANCE = Mappers.getMapper(MessageMapper.class);
 
     MessageEntity messageDtoToEntity(MessageDto messageDto);
 
@@ -26,5 +29,4 @@ public interface MessageMapper {
 
         return mappedEntity;
     }
-
 }

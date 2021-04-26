@@ -31,6 +31,7 @@ public class UserService {
     }
 
     public UserDto findById(UserDto userDto) throws ServiceException {
+
         validator.validateId(userDto);
 
         UserEntity userEntity;
@@ -45,6 +46,7 @@ public class UserService {
     }
 
     public UserDto save(UserDto userDto) throws ServiceException {
+
         validator.validate(userDto);
 
         UserDto response;
@@ -61,6 +63,7 @@ public class UserService {
     }
 
     public UserDto edit(UserDto userDto) throws ServiceException {
+
         validator.validateId(userDto);
 
         UserDto responseDto;
@@ -80,6 +83,7 @@ public class UserService {
     }
 
     public void delete(UserDto userDto) throws ServiceException {
+
         validator.validateId(userDto);
 
         try {
