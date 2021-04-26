@@ -20,7 +20,7 @@ public class OnlineStatusController {
     private final OnlineStatusService onlineStatusService;
 
     @GetMapping
-    public ResponseEntity<List<OnlineStatusDto>> findAllOnlineStatuses() {
+    public ResponseEntity<List<OnlineStatusDto>> findAll() {
 
         List<OnlineStatusDto> responseList = onlineStatusService.findAll();
 
@@ -38,7 +38,7 @@ public class OnlineStatusController {
             return ResponseEntity.ok(responseDto);
         } catch (ServiceException ex) {
             log.error("Cannot find online status by id, id={}", id, ex);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
@@ -49,12 +49,12 @@ public class OnlineStatusController {
             return ResponseEntity.ok(responseDto);
         } catch (ServiceException ex) {
             log.error("Cannot find OnlineStatus by userId, userId={}", userId, ex);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
     @PostMapping
-    public ResponseEntity<OnlineStatusDto> saveOnlineStatus(@RequestBody OnlineStatusDto onlineStatusDto) {
+    public ResponseEntity<OnlineStatusDto> save(@RequestBody OnlineStatusDto onlineStatusDto) {
         try {
             OnlineStatusDto responseDto = onlineStatusService.save(onlineStatusDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
@@ -65,7 +65,7 @@ public class OnlineStatusController {
     }
 
     @PutMapping
-    public ResponseEntity<OnlineStatusDto> editOnlineStatus(@RequestBody OnlineStatusDto onlineStatusDto) {
+    public ResponseEntity<OnlineStatusDto> edit(@RequestBody OnlineStatusDto onlineStatusDto) {
         try {
             OnlineStatusDto responseDto = onlineStatusService.edit(onlineStatusDto);
             return ResponseEntity.ok(responseDto);
@@ -76,10 +76,10 @@ public class OnlineStatusController {
     }
 
     @DeleteMapping
-    public ResponseEntity<HttpStatus> deleteOnlineStatus(@RequestBody OnlineStatusDto onlineStatusDto) {
+    public ResponseEntity<HttpStatus> delete(@RequestBody OnlineStatusDto onlineStatusDto) {
         try {
             onlineStatusService.delete(onlineStatusDto);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (ServiceException ex) {
             log.error("Cannot edit OnlineStatus with userId={}", onlineStatusDto.getUserId(), ex);
             return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
