@@ -29,7 +29,7 @@ create table message
     message_text text not null,
     create_time timestamp with TIME ZONE default CURRENT_TIMESTAMP not null,
     modify_time timestamp with TIME ZONE,
-    is_read boolean default false,
+    is_read boolean default false DEFAULT false,
     status status default 'DELAYED'
 );
 

@@ -24,6 +24,7 @@ public class UserEntity implements Serializable {
 
     private String login;
 
+    @ToString.Exclude
     private String password;
 
     private String email;
