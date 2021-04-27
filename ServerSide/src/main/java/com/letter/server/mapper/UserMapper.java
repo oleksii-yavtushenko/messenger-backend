@@ -19,8 +19,8 @@ public interface UserMapper {
 
         mappedEntity.setId(userEntity.getId());
         mappedEntity.setLogin(userDto.getLogin() != null ? userDto.getLogin() : userEntity.getLogin());
-        mappedEntity.setPassword(userDto.getPassword() != null ? userDto.getLogin() : userEntity.getPassword());
-        mappedEntity.setEmail(userDto.getEmail() != null ? userDto.getEmail() : userEntity.getPassword());
+        mappedEntity.setPassword(userDto.getPassword() != null ? userDto.getPassword() : userEntity.getPassword());
+        mappedEntity.setEmail(userDto.getEmail() != null ? userDto.getEmail() : userEntity.getEmail());
         mappedEntity.setOnlineStatus(userDto.getOnlineStatus() != null ?
                 OnlineStatusMapper.INSTANCE.onlineStatusDtoToEntity(userDto.getOnlineStatus()) : userEntity.getOnlineStatus());
 

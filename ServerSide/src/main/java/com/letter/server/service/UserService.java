@@ -2,6 +2,7 @@ package com.letter.server.service;
 
 import com.letter.server.dao.entity.UserEntity;
 import com.letter.server.dao.repository.UserRepository;
+import com.letter.server.dto.OnlineStatusDto;
 import com.letter.server.dto.UserDto;
 import com.letter.server.mapper.UserMapper;
 import com.letter.server.service.exception.ServiceException;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,6 +25,8 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final Validator<UserDto> validator;
+
+    private final OnlineStatusService onlineStatusService;
 
     public List<UserDto> findAll() {
         List<UserEntity> userEntities = StreamSupport.stream(userRepository.findAll().spliterator(), false).collect(Collectors.toList());
@@ -50,11 +54,26 @@ public class UserService {
         validator.validate(userDto);
 
         UserDto response;
+        boolean autoOnlineStatus = userDto.getOnlineStatus() == null;
 
         try {
             UserEntity userEntity = userMapper.userDtoToEntity(userDto);
+            OnlineStatusDto userOnlineStatus = userDto.getOnlineStatus();
+
+            if (autoOnlineStatus) {
+                userOnlineStatus = OnlineStatusDto.builder()
+                        .isOnline(false)
+                        .lastOnlineTime(OffsetDateTime.now())
+                        .build();
+            }
+
+            userEntity.setOnlineStatus(null);
 
             response = userMapper.userEntityToDto(userRepository.save(userEntity));
+
+            userOnlineStatus.setUserId(response.getId());
+            response.setOnlineStatus(onlineStatusService.save(userOnlineStatus));
+
         } catch (Exception ex) {
             throw new ServiceException("Exception while mapping and saving userEntity with login=" + userDto.getLogin(), ex);
         }
@@ -87,7 +106,7 @@ public class UserService {
         validator.validateId(userDto);
 
         try {
-            UserEntity userEntity = userMapper.userDtoToEntity(userDto);
+            UserEntity userEntity = userRepository.findById(userDto.getId()).orElseThrow(EntityNotFoundException::new);
 
             userRepository.delete(userEntity);
         } catch (Exception ex) {

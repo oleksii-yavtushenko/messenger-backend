@@ -4,4 +4,6 @@ import com.letter.server.dao.entity.OnlineStatusEntity;
 import org.springframework.data.repository.CrudRepository;
 
 public interface OnlineStatusRepository extends CrudRepository<OnlineStatusEntity, Long> {
+
+    OnlineStatusEntity findByUserId(Long userId);
 }

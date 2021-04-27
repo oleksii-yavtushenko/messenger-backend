@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 public class OnlineStatusEntity implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @EqualsAndHashCode.Exclude

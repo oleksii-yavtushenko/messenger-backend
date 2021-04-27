@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,6 +63,20 @@ public class MessageService {
         return responseList;
     }
 
+    public MessageDto findById(Long id) throws ServiceException {
+        MessageDto response;
+
+        try {
+            MessageEntity messageEntity = messageRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+
+            response = messageMapper.messageEntityToDto(messageEntity);
+        } catch (Exception ex) {
+            throw new ServiceException("Exception while sending message, id=" + id, ex);
+        }
+
+        return response;
+    }
+
     public MessageDto send(MessageDto messageDto) throws ServiceException {
 
         messageValidator.validate(messageDto);
@@ -76,7 +91,7 @@ public class MessageService {
 
             response = messageMapper.messageEntityToDto(messageEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while sending message, senderId=" + messageDto.getSender() + ", recipientId=" + messageDto.getRecipient(), ex);
+            throw new ServiceException("Exception while sending message, sender=" + messageDto.getSender() + ", recipient=" + messageDto.getRecipient(), ex);
         }
 
         return response;
@@ -84,12 +99,12 @@ public class MessageService {
 
     public MessageDto read(MessageDto messageDto) throws ServiceException {
 
-        messageValidator.validate(messageDto);
+        messageValidator.validateId(messageDto);
 
         MessageDto response;
 
         try {
-            MessageEntity messageEntity = messageMapper.messageDtoToEntity(messageDto);
+            MessageEntity messageEntity = messageRepository.findById(messageDto.getId()).orElseThrow(EntityNotFoundException::new);
             messageEntity.setIsRead(true);
 
             messageEntity = messageRepository.save(messageEntity);
@@ -104,16 +119,19 @@ public class MessageService {
 
     public MessageDto edit(MessageDto messageDto) throws ServiceException {
 
-        messageValidator.validate(messageDto);
+        messageValidator.validateId(messageDto);
 
         MessageDto response;
 
         try {
-            MessageEntity messageEntity = messageMapper.messageDtoToEntity(messageDto);
-            messageEntity.setModifyTime(OffsetDateTime.now());
-            messageEntity.setStatus(Status.EDITED);
+            MessageEntity messageEntity = messageRepository.findById(messageDto.getId()).orElseThrow(EntityNotFoundException::new);
 
-            messageEntity = messageRepository.save(messageEntity);
+            MessageEntity toSave = messageMapper.editMessageDtoToEntity(messageEntity, messageDto);
+
+            toSave.setModifyTime(OffsetDateTime.now());
+            toSave.setStatus(Status.EDITED);
+
+            messageEntity = messageRepository.save(toSave);
 
             response = messageMapper.messageEntityToDto(messageEntity);
         } catch (Exception ex) {
@@ -125,15 +143,15 @@ public class MessageService {
 
     public void delete(MessageDto messageDto) throws ServiceException {
 
-        messageValidator.validate(messageDto);
+        messageValidator.validateId(messageDto);
 
         try {
-            MessageEntity messageEntity = messageMapper.messageDtoToEntity(messageDto);
+            MessageEntity messageEntity = messageRepository.findById(messageDto.getId()).orElseThrow(EntityNotFoundException::new);
             messageEntity.setStatus(Status.DELETED);
 
-            messageRepository.delete(messageEntity);
+            messageRepository.save(messageEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while editing message, id=" + messageDto.getId(), ex);
+            throw new ServiceException("Exception while deleting message, id=" + messageDto.getId(), ex);
         }
     }
 }

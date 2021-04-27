@@ -42,5 +42,6 @@ public class MessageEntity implements Serializable {
     private Boolean isRead;
 
     @Enumerated(EnumType.STRING)
+    @Type(type="com.letter.server.dao.entity.StatusType")
     private Status status;
 }
