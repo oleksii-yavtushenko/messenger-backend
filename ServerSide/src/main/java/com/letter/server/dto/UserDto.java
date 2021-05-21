@@ -21,4 +21,8 @@ public class UserDto implements Serializable {
     private String password;
 
     private String email;
+
+    private boolean enabled;
+
+    private String authorizationToken;
 }
