@@ -2,11 +2,11 @@ package com.letter.server.service;
 
 import com.letter.server.dao.entity.UserEntity;
 import com.letter.server.dao.repository.UserRepository;
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.DetailedUser;
 import com.letter.server.mapper.UserMapper;
 import com.letter.server.service.exception.LoginException;
 import com.letter.server.service.exception.ServiceException;
-import com.letter.server.service.validation.UserValidator;
+import com.letter.server.service.validation.UserDetailedValidator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -23,28 +23,28 @@ public class RegisterService {
 
     private UserRepository userRepository;
 
-    private UserValidator userValidator;
+    private UserDetailedValidator userDetailedValidator;
 
     private UserMapper userMapper;
 
     private PasswordEncoder passwordEncoder;
 
-    public UserDto register(UserDto userDto) throws ServiceException {
+    public DetailedUser register(DetailedUser detailedUser) throws ServiceException {
 
-        userValidator.validate(userDto);
+        userDetailedValidator.validate(detailedUser);
 
-        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        detailedUser.setPassword(passwordEncoder.encode(detailedUser.getPassword()));
 
-        UserEntity userEntity = userMapper.userDtoToEntity(userDto);
+        UserEntity userEntity = userMapper.userDtoDetailedToEntity(detailedUser);
 
         try {
             userEntity = userRepository.save(userEntity);
         } catch (EntityNotFoundException ex) {
-            throw new LoginException("User cannot be saved, login=" + userDto.getLogin(), ex);
+            throw new LoginException("User cannot be saved, login=" + detailedUser.getLogin(), ex);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while registering user, login=" + userDto.getLogin());
+            throw new ServiceException("Exception while registering user, login=" + detailedUser.getLogin());
         }
 
-        return userMapper.userEntityToDto(userEntity);
+        return userMapper.userEntityToDtoDetailed(userEntity);
     }
 }

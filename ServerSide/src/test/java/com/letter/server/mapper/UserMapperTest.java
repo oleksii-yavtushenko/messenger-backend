@@ -2,8 +2,8 @@ package com.letter.server.mapper;
 
 import com.letter.server.dao.entity.OnlineStatusEntity;
 import com.letter.server.dao.entity.UserEntity;
+import com.letter.server.dto.DetailedUser;
 import com.letter.server.dto.OnlineStatusDto;
-import com.letter.server.dto.UserDto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class UserMapperTest {
 
     private static UserEntity userEntity;
 
-    private static UserDto userDto;
+    private static DetailedUser detailedUser;
 
     @BeforeAll
     public static void beforeAllTests() {
@@ -32,7 +32,7 @@ public class UserMapperTest {
                 .password("pass")
                 .build();
 
-        userDto = UserDto.builder()
+        detailedUser = DetailedUser.detailedUserBuilder()
                 .id(1L)
                 .login("login")
                 .email("log@email.com")
@@ -48,18 +48,18 @@ public class UserMapperTest {
 
         OnlineStatusDto onlineStatusDto = OnlineStatusDto.builder()
                 .id(1L)
-                .userId(userDto.getId())
+                .userId(detailedUser.getId())
                 .isOnline(false)
                 .lastOnlineTime(OffsetDateTime.now())
                 .build();
 
          userEntity.setOnlineStatus(onlineStatusEntity);
-         userDto.setOnlineStatus(onlineStatusDto);
+         detailedUser.setOnlineStatus(onlineStatusDto);
     }
 
     @Test
     public void userEntityToDto_ShouldMapCorrectly() {
-        UserDto actual = userMapper.userEntityToDto(userEntity);
+        DetailedUser actual = userMapper.userEntityToDtoDetailed(userEntity);
 
         assertEquals(userEntity.getId(), actual.getId());
         assertEquals(userEntity.getLogin(), actual.getLogin());
@@ -73,15 +73,15 @@ public class UserMapperTest {
 
     @Test
     public void userDtoToEntity_ShouldMapCorrectly() {
-        UserEntity actual = userMapper.userDtoToEntity(userDto);
+        UserEntity actual = userMapper.userDtoDetailedToEntity(detailedUser);
 
-        assertEquals(userDto.getId(), actual.getId());
-        assertEquals(userDto.getLogin(), actual.getLogin());
-        assertEquals(userDto.getEmail(), actual.getEmail());
-        assertEquals(userDto.getPassword(), actual.getPassword());
-        assertEquals(userDto.getOnlineStatus().getId(), actual.getOnlineStatus().getId());
-        assertEquals(userDto.getOnlineStatus().getId(), actual.getOnlineStatus().getUser().getId());
-        assertEquals(userDto.getOnlineStatus().getIsOnline(), actual.getOnlineStatus().getIsOnline());
-        assertEquals(userDto.getOnlineStatus().getLastOnlineTime(), actual.getOnlineStatus().getLastOnlineTime());
+        assertEquals(detailedUser.getId(), actual.getId());
+        assertEquals(detailedUser.getLogin(), actual.getLogin());
+        assertEquals(detailedUser.getEmail(), actual.getEmail());
+        assertEquals(detailedUser.getPassword(), actual.getPassword());
+        assertEquals(detailedUser.getOnlineStatus().getId(), actual.getOnlineStatus().getId());
+        assertEquals(detailedUser.getOnlineStatus().getId(), actual.getOnlineStatus().getUser().getId());
+        assertEquals(detailedUser.getOnlineStatus().getIsOnline(), actual.getOnlineStatus().getIsOnline());
+        assertEquals(detailedUser.getOnlineStatus().getLastOnlineTime(), actual.getOnlineStatus().getLastOnlineTime());
     }
 }

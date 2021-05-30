@@ -1,7 +1,8 @@
 package com.letter.server.mapper;
 
 import com.letter.server.dao.entity.UserEntity;
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.DetailedUser;
+import com.letter.server.dto.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -10,20 +11,24 @@ public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    UserEntity userDtoToEntity(UserDto userDto);
+    UserEntity userDtoDetailedToEntity(DetailedUser detailedUser);
 
-    UserDto userEntityToDto(UserEntity userEntity);
+    DetailedUser userEntityToDtoDetailed(UserEntity userEntity);
 
-    default UserEntity editUserDtoToEntity(UserEntity userEntity, UserDto userDto) {
+    UserEntity userDtoToEntity(User user);
+
+    User userEntityToDto(UserEntity userEntity);
+
+    default UserEntity editUserDtoToEntity(UserEntity userEntity, DetailedUser detailedUser) {
         UserEntity mappedEntity = new UserEntity();
 
         mappedEntity.setId(userEntity.getId());
-        mappedEntity.setLogin(userDto.getLogin() != null ? userDto.getLogin() : userEntity.getLogin());
-        mappedEntity.setPassword(userDto.getPassword() != null ? userDto.getPassword() : userEntity.getPassword());
-        mappedEntity.setEmail(userDto.getEmail() != null ? userDto.getEmail() : userEntity.getEmail());
-        mappedEntity.setEnabled(userDto.isEnabled());
-        mappedEntity.setOnlineStatus(userDto.getOnlineStatus() != null ?
-                OnlineStatusMapper.INSTANCE.onlineStatusDtoToEntity(userDto.getOnlineStatus()) : userEntity.getOnlineStatus());
+        mappedEntity.setLogin(detailedUser.getLogin() != null ? detailedUser.getLogin() : userEntity.getLogin());
+        mappedEntity.setPassword(detailedUser.getPassword() != null ? detailedUser.getPassword() : userEntity.getPassword());
+        mappedEntity.setEmail(detailedUser.getEmail() != null ? detailedUser.getEmail() : userEntity.getEmail());
+        mappedEntity.setEnabled(detailedUser.isEnabled());
+        mappedEntity.setOnlineStatus(detailedUser.getOnlineStatus() != null ?
+                OnlineStatusMapper.INSTANCE.onlineStatusDtoToEntity(detailedUser.getOnlineStatus()) : userEntity.getOnlineStatus());
 
         return mappedEntity;
     }

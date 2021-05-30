@@ -11,13 +11,13 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class MessageDto implements Serializable {
+public class Message implements Serializable {
 
     private Long id;
 
-    private UserDto sender;
+    private Long senderId;
 
-    private UserDto recipient;
+    private Long recipientId;
 
     private String messageText;
 

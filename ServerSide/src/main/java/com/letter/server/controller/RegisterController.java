@@ -1,6 +1,6 @@
 package com.letter.server.controller;
 
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.DetailedUser;
 import com.letter.server.service.RegisterService;
 import com.letter.server.service.exception.LoginException;
 import com.letter.server.service.exception.ServiceException;
@@ -23,23 +23,23 @@ public class RegisterController {
     private final RegisterService registerService;
 
     @PostMapping
-    public ResponseEntity<UserDto> register(@RequestBody UserDto userDto) {
-        log.info("Registering user, login={}, email={}", userDto.getLogin(), userDto.getEmail());
+    public ResponseEntity<DetailedUser> register(@RequestBody DetailedUser detailedUser) {
+        log.info("Registering user, login={}, email={}", detailedUser.getLogin(), detailedUser.getEmail());
 
-        UserDto repositoryUser;
+        DetailedUser repositoryUser;
 
         try {
-            repositoryUser = registerService.register(userDto);
+            repositoryUser = registerService.register(detailedUser);
 
             log.info("Successful user registration, login={}", repositoryUser.getLogin());
             return ResponseEntity.ok(repositoryUser);
         } catch (ServiceException ex) {
             if (ex instanceof LoginException || ex instanceof ValidationException) {
-                log.error("User cannot be registered, login={}, cause={}", userDto.getLogin(), ex.getMessage());
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userDto);
+                log.error("User cannot be registered, login={}, cause={}", detailedUser.getLogin(), ex.getMessage());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(detailedUser);
             }
-            log.error("Exception while registering user, login={}", userDto.getLogin(), ex);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userDto);
+            log.error("Exception while registering user, login={}", detailedUser.getLogin(), ex);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(detailedUser);
         }
     }
 }
