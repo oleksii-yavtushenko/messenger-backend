@@ -1,8 +1,10 @@
 package com.letter.server.mapper;
 
 import com.letter.server.dao.entity.MessageEntity;
-import com.letter.server.dto.MessageDto;
+import com.letter.server.dto.DetailedMessage;
+import com.letter.server.dto.Message;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", uses = UserMapper.class)
@@ -10,15 +12,23 @@ public interface MessageMapper {
 
     MessageMapper INSTANCE = Mappers.getMapper(MessageMapper.class);
 
-    MessageEntity messageDtoToEntity(MessageDto messageDto);
+    MessageEntity detailedMessageToMessageEntity(DetailedMessage detailedMessage);
 
-    MessageDto messageEntityToDto(MessageEntity messageEntity);
+    DetailedMessage messageEntityToDetailedMessage(MessageEntity messageEntity);
 
-    default MessageEntity editMessageDtoToEntity(MessageEntity messageEntity, MessageDto messageDto) {
+    @Mapping(source = "sender.id", target = "senderId")
+    @Mapping(source = "recipient.id", target = "recipientId")
+    Message messageEntityToMessage(MessageEntity messageEntity);
+
+    @Mapping(source = "senderId", target = "sender.id")
+    @Mapping(source = "recipientId", target = "recipient.id")
+    MessageEntity messageToMessageEntity(Message message);
+
+    default MessageEntity editMessageDtoToEntity(MessageEntity messageEntity, DetailedMessage detailedMessage) {
         MessageEntity mappedEntity = new MessageEntity();
 
         mappedEntity.setId(messageEntity.getId());
-        mappedEntity.setMessageText(messageDto.getMessageText() != null ? messageDto.getMessageText() : messageEntity.getMessageText());
+        mappedEntity.setMessageText(detailedMessage.getMessageText() != null ? detailedMessage.getMessageText() : messageEntity.getMessageText());
         mappedEntity.setRecipient(messageEntity.getRecipient());
         mappedEntity.setSender(messageEntity.getSender());
         mappedEntity.setCreateTime(messageEntity.getCreateTime());

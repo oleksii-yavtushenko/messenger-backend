@@ -1,7 +1,6 @@
 package com.letter.server.controller;
 
-import com.letter.server.dto.MessageDto;
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.*;
 import com.letter.server.service.MessageService;
 import com.letter.server.service.exception.ServiceException;
 import lombok.AllArgsConstructor;
@@ -21,9 +20,9 @@ public class MessageController {
 
     private final MessageService messageService;
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<MessageDto>> findAllByTwoUsers(@RequestParam(name = "firstUserId", defaultValue = "-1L") String firstUserId,
-                                                              @RequestParam(name = "secondUserId", defaultValue = "-1L") String secondUserId) {
+    @GetMapping(value = "/detailed", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseWrapper<List<DetailedMessage>>> findAllByTwoUsersDetailed(@RequestParam(name = "firstUserId", defaultValue = "-1L") String firstUserId,
+                                                                                            @RequestParam(name = "secondUserId", defaultValue = "-1L") String secondUserId) {
         if ("-1L".equals(firstUserId) || "-1".equals(secondUserId)) {
             return ResponseEntity.badRequest().build();
         }
@@ -40,56 +39,99 @@ public class MessageController {
         }
 
         try {
-            List<MessageDto> messageDtoList = messageService.findAllByTwoUsers(UserDto.builder().id(firstUserIdLong).build(), UserDto.builder().id(secondUserIdLong).build());
+            List<DetailedMessage> messageList = messageService.findAllByTwoUsers(DetailedUser.detailedUserBuilder().id(firstUserIdLong).build(), DetailedUser.detailedUserBuilder().id(secondUserIdLong).build());
 
-            if (messageDtoList == null || messageDtoList.isEmpty()) {
+            if (messageList == null || messageList.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
-            return ResponseEntity.ok(messageDtoList);
+            return ResponseEntity.ok(new ResponseWrapper<>(messageList));
         } catch (ServiceException ex) {
             log.error("Cannot find messages by two users, firstUserId={}, secondUserId={}", firstUserId, secondUserId, ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MessageDto> findById(@PathVariable Long id) {
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseWrapper<List<Message>>> findAllByTwoUsers(@RequestParam(name = "firstUserId", defaultValue = "-1L") String firstUserId,
+                                                                            @RequestParam(name = "secondUserId", defaultValue = "-1L") String secondUserId) {
+        if ("-1L".equals(firstUserId) || "-1".equals(secondUserId)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        long firstUserIdLong;
+        long secondUserIdLong;
+
         try {
-            MessageDto responseDto = messageService.findById(id);
-            return ResponseEntity.ok(responseDto);
+            firstUserIdLong = Long.parseLong(firstUserId);
+            secondUserIdLong = Long.parseLong(secondUserId);
+        } catch (NumberFormatException ex) {
+            log.error("Exception while parsing UserId, firstUserId={}, secondUserId={}", firstUserId, secondUserId, ex);
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            List<Message> messageList = messageService.findAllByTwoUsers(User.userBuilder().id(firstUserIdLong).build(), User.userBuilder().id(secondUserIdLong).build());
+
+            if (messageList == null || messageList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return ResponseEntity.ok(new ResponseWrapper<>(messageList));
+        } catch (ServiceException ex) {
+            log.error("Cannot find messages by two users, firstUserId={}, secondUserId={}", firstUserId, secondUserId, ex);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value = "/detailed/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseWrapper<DetailedMessage>> findById(@PathVariable Long id) {
+        try {
+            DetailedMessage responseDto = messageService.findById(id);
+            return ResponseEntity.ok(new ResponseWrapper<>(responseDto));
         } catch (ServiceException ex) {
             log.error("Cannot find message by its id, id={}", id, ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MessageDto> send(@RequestBody MessageDto messageDto) {
+    @PostMapping(value = "/detailed/send", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseWrapper<DetailedMessage>> sendDetailed(@RequestBody DetailedMessage detailedMessage) {
         try {
-            MessageDto responseDto = messageService.send(messageDto);
-            return ResponseEntity.ok(responseDto);
+            DetailedMessage responseDto = messageService.sendDetailed(detailedMessage);
+            return ResponseEntity.ok(new ResponseWrapper<>(responseDto));
         } catch (ServiceException ex) {
-            log.error("Cannot send message, senderId={}, recipientId={}", messageDto.getSender(), messageDto.getRecipient(), ex);
+            log.error("Cannot send message, senderId={}, recipientId={}", detailedMessage.getSender(), detailedMessage.getRecipient(), ex);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseWrapper<Message>> send(@RequestBody Message message) {
+        try {
+            Message response = messageService.send(message);
+            return ResponseEntity.ok(new ResponseWrapper<>(response));
+        } catch (ServiceException ex) {
+            log.error("Cannot send message, senderId={}, recipientId={}", message.getSenderId(), message.getRecipientId(), ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping(value = "/read", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MessageDto> read(@RequestBody MessageDto messageDto) {
+    public ResponseEntity<DetailedMessage> read(@RequestBody DetailedMessage detailedMessage) {
         try {
-            MessageDto responseDto = messageService.read(messageDto);
+            DetailedMessage responseDto = messageService.read(detailedMessage);
             return ResponseEntity.ok(responseDto);
         } catch (ServiceException ex) {
-            log.error("Cannot read message, sender={}, recipient={}", messageDto.getSender(), messageDto.getRecipient(), ex);
+            log.error("Cannot read message, sender={}, recipient={}", detailedMessage.getSender(), detailedMessage.getRecipient(), ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @PostMapping(value ="/read/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MessageDto> readById(@PathVariable Long id) {
+    @PostMapping(value = "/read/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DetailedMessage> readById(@PathVariable Long id) {
         try {
-            MessageDto responseDto = messageService.read(MessageDto.builder().id(id).build());
+            DetailedMessage responseDto = messageService.read(DetailedMessage.builder().id(id).build());
             return ResponseEntity.ok(responseDto);
         } catch (ServiceException ex) {
             log.error("Cannot read message, id={}", id, ex);
@@ -98,31 +140,31 @@ public class MessageController {
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MessageDto> edit(@RequestBody MessageDto messageDto) {
+    public ResponseEntity<DetailedMessage> edit(@RequestBody DetailedMessage detailedMessage) {
         try {
-            MessageDto responseDto = messageService.edit(messageDto);
+            DetailedMessage responseDto = messageService.edit(detailedMessage);
             return ResponseEntity.ok(responseDto);
         } catch (ServiceException ex) {
-            log.error("Cannot edit message, senderId={}, recipientId={}", messageDto.getSender(), messageDto.getRecipient(), ex);
+            log.error("Cannot edit message, senderId={}, recipientId={}", detailedMessage.getSender(), detailedMessage.getRecipient(), ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MessageDto> delete(@RequestBody MessageDto messageDto) {
+    public ResponseEntity<DetailedMessage> delete(@RequestBody DetailedMessage detailedMessage) {
         try {
-            messageService.delete(messageDto);
+            messageService.delete(detailedMessage);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (ServiceException ex) {
-            log.error("Cannot edit message, id={}", messageDto.getId(), ex);
+            log.error("Cannot edit message, id={}", detailedMessage.getId(), ex);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<MessageDto> delete(@PathVariable Long id) {
+    public ResponseEntity<DetailedMessage> delete(@PathVariable Long id) {
         try {
-            messageService.delete(MessageDto.builder().id(id).build());
+            messageService.delete(DetailedMessage.builder().id(id).build());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (ServiceException ex) {
             log.error("Cannot edit message, id={}", id, ex);

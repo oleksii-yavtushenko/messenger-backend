@@ -6,7 +6,8 @@ create table "user_entity"
     id serial not null constraint user_entity_pk primary key,
     login varchar(64) not null,
     password varchar(64) not null,
-    email varchar(64)
+    email varchar(64),
+    enabled boolean DEFAULT true
 );
 
 create unique index user_entity_login_uindex
@@ -29,7 +30,7 @@ create table message
     message_text text not null,
     create_time timestamp with TIME ZONE default CURRENT_TIMESTAMP not null,
     modify_time timestamp with TIME ZONE,
-    is_read boolean default false DEFAULT false,
+    is_read boolean default false,
     status status default 'DELAYED'
 );
 
@@ -53,9 +54,9 @@ start transaction;
 
 insert into "user_entity" (id, login, password, email)
 values
-(1, 'coolboy', 'booy', 'dumb_email@mail.com'),
-(2, 'coolgirl', 'giirl', 'normal_mail@mail.com'),
-(3, 'admin', 'admin', 'fogmrfog@gmail.com');
+(1, 'coolboy', '$2a$10$4FkZnrjjxLUM.l334P9i1OuCJ.Onjb9Ju3ln0ycWzycl.M5Vu2kGG', 'dumb_email@mail.com'), -- pass: booy
+(2, 'coolgirl', '$2a$10$WuZy3ROEBR1xkHPbwWssHOZfyf5N9vLLRpjPk1UQsRsndLyHor8HK', 'normal_mail@mail.com'), -- pass: giirl
+(3, 'admin', '$2a$10$FjzbcpT9lxqSHBtysyhiUO7RsPmye.9fp6jqLMHwlFpqNPYr93Y3q', 'fogmrfog@gmail.com'); -- pass: admin
 
 commit;
 

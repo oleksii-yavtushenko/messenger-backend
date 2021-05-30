@@ -2,12 +2,12 @@ package com.letter.server.service;
 
 import com.letter.server.dao.entity.UserEntity;
 import com.letter.server.dao.repository.UserRepository;
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.DetailedUser;
 import com.letter.server.jwt.JwtTokenUtil;
 import com.letter.server.mapper.UserMapper;
 import com.letter.server.service.exception.LoginException;
 import com.letter.server.service.exception.ServiceException;
-import com.letter.server.service.validation.UserValidator;
+import com.letter.server.service.validation.UserDetailedValidator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class LoginService {
 
     private UserRepository userRepository;
 
-    private UserValidator userValidator;
+    private UserDetailedValidator userDetailedValidator;
 
     private UserMapper userMapper;
 
@@ -34,9 +34,10 @@ public class LoginService {
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    public UserEntity logIn(UserDto userDto) throws ServiceException {
+    public UserEntity logIn(DetailedUser detailedUser) throws ServiceException {
 
-        userValidator.validateLogin(userDto);
+
+        userDetailedValidator.validateLogin(detailedUser);
 
         UserEntity userEntity;
 
@@ -44,15 +45,15 @@ public class LoginService {
             Authentication authenticate = authenticationManager
                     .authenticate(
                             new UsernamePasswordAuthenticationToken(
-                                    userDto.getLogin(), userDto.getPassword()
+                                    detailedUser.getLogin(), detailedUser.getPassword()
                             )
                     );
 
             userEntity = (UserEntity) authenticate.getPrincipal();
         } catch (EntityNotFoundException ex) {
-            throw new LoginException("User cannot be found, login=" + userDto.getLogin(), ex);
+            throw new LoginException("User cannot be found, login=" + detailedUser.getLogin(), ex);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while logging in user, login=" + userDto.getLogin());
+            throw new ServiceException("Exception while logging in user, login=" + detailedUser.getLogin());
         }
 
         return userEntity;

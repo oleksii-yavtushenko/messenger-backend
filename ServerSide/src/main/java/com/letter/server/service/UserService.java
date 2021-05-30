@@ -2,8 +2,9 @@ package com.letter.server.service;
 
 import com.letter.server.dao.entity.UserEntity;
 import com.letter.server.dao.repository.UserRepository;
+import com.letter.server.dto.DetailedUser;
 import com.letter.server.dto.OnlineStatusDto;
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.User;
 import com.letter.server.mapper.UserMapper;
 import com.letter.server.service.exception.ServiceException;
 import com.letter.server.service.validation.Validator;
@@ -24,41 +25,54 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-    private final Validator<UserDto> validator;
+    private final Validator<DetailedUser> validator;
 
     private final OnlineStatusService onlineStatusService;
 
-    public List<UserDto> findAll() {
+    public List<DetailedUser> findAll() {
         List<UserEntity> userEntities = StreamSupport.stream(userRepository.findAll().spliterator(), false).collect(Collectors.toList());
 
-        return userEntities.stream().map(userMapper::userEntityToDto).collect(Collectors.toList());
+        return userEntities.stream().map(userMapper::userEntityToDtoDetailed).collect(Collectors.toList());
     }
 
-    public UserDto findById(UserDto userDto) throws ServiceException {
+    public DetailedUser findByIdDetailed(Long id) throws ServiceException {
 
-        validator.validateId(userDto);
+        validator.validateId(DetailedUser.detailedUserBuilder().id(id).build());
 
         UserEntity userEntity;
 
         try {
-            userEntity = userRepository.findById(userDto.getId()).orElseThrow(EntityNotFoundException::new);
+            userEntity = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while finding userEntity with id=" + userDto.getId(), ex);
+            throw new ServiceException("Exception while finding userEntity with id=" + id, ex);
+        }
+
+        return userMapper.userEntityToDtoDetailed(userEntity);
+    }
+
+    public User findById(Long id) throws ServiceException {
+        validator.validateId(DetailedUser.detailedUserBuilder().id(id).build());
+
+        UserEntity userEntity;
+
+        try {
+            userEntity = userRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        } catch (Exception ex) {
+            throw new ServiceException("Exception while finding userEntity with id=" + id, ex);
         }
 
         return userMapper.userEntityToDto(userEntity);
     }
+    public DetailedUser save(DetailedUser detailedUser) throws ServiceException {
 
-    public UserDto save(UserDto userDto) throws ServiceException {
+        validator.validate(detailedUser);
 
-        validator.validate(userDto);
-
-        UserDto response;
-        boolean autoOnlineStatus = userDto.getOnlineStatus() == null;
+        DetailedUser response;
+        boolean autoOnlineStatus = detailedUser.getOnlineStatus() == null;
 
         try {
-            UserEntity userEntity = userMapper.userDtoToEntity(userDto);
-            OnlineStatusDto userOnlineStatus = userDto.getOnlineStatus();
+            UserEntity userEntity = userMapper.userDtoDetailedToEntity(detailedUser);
+            OnlineStatusDto userOnlineStatus = detailedUser.getOnlineStatus();
 
             if (autoOnlineStatus) {
                 userOnlineStatus = OnlineStatusDto.builder()
@@ -69,48 +83,48 @@ public class UserService {
 
             userEntity.setOnlineStatus(null);
 
-            response = userMapper.userEntityToDto(userRepository.save(userEntity));
+            response = userMapper.userEntityToDtoDetailed(userRepository.save(userEntity));
 
             userOnlineStatus.setUserId(response.getId());
             response.setOnlineStatus(onlineStatusService.save(userOnlineStatus));
 
         } catch (Exception ex) {
-            throw new ServiceException("Exception while mapping and saving userEntity with login=" + userDto.getLogin(), ex);
+            throw new ServiceException("Exception while mapping and saving userEntity with login=" + detailedUser.getLogin(), ex);
         }
 
         return response;
     }
 
-    public UserDto edit(UserDto userDto) throws ServiceException {
+    public DetailedUser edit(DetailedUser detailedUser) throws ServiceException {
 
-        validator.validateId(userDto);
+        validator.validateId(detailedUser);
 
-        UserDto responseDto;
+        DetailedUser responseDto;
 
         try {
-            UserEntity userEntity = userRepository.findById(userDto.getId()).orElseThrow(EntityNotFoundException::new);
+            UserEntity userEntity = userRepository.findById(detailedUser.getId()).orElseThrow(EntityNotFoundException::new);
 
-            UserEntity responseEntity = userMapper.editUserDtoToEntity(userEntity, userDto);
+            UserEntity responseEntity = userMapper.editUserDtoToEntity(userEntity, detailedUser);
             responseEntity = userRepository.save(responseEntity);
 
-            responseDto = userMapper.userEntityToDto(responseEntity);
+            responseDto = userMapper.userEntityToDtoDetailed(responseEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while mapping and editing userEntity with id=" + userDto.getId(), ex);
+            throw new ServiceException("Exception while mapping and editing userEntity with id=" + detailedUser.getId(), ex);
         }
 
         return responseDto;
     }
 
-    public void delete(UserDto userDto) throws ServiceException {
+    public void delete(DetailedUser detailedUser) throws ServiceException {
 
-        validator.validateId(userDto);
+        validator.validateId(detailedUser);
 
         try {
-            UserEntity userEntity = userRepository.findById(userDto.getId()).orElseThrow(EntityNotFoundException::new);
+            UserEntity userEntity = userRepository.findById(detailedUser.getId()).orElseThrow(EntityNotFoundException::new);
 
             userRepository.delete(userEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while deleting userEntity with id=" + userDto.getId(), ex);
+            throw new ServiceException("Exception while deleting userEntity with id=" + detailedUser.getId(), ex);
         }
     }
 

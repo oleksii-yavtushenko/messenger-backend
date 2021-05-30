@@ -4,8 +4,10 @@ import com.letter.server.dao.entity.MessageEntity;
 import com.letter.server.dao.entity.Status;
 import com.letter.server.dao.entity.UserEntity;
 import com.letter.server.dao.repository.MessageRepository;
-import com.letter.server.dto.MessageDto;
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.DetailedMessage;
+import com.letter.server.dto.DetailedUser;
+import com.letter.server.dto.Message;
+import com.letter.server.dto.User;
 import com.letter.server.mapper.MessageMapper;
 import com.letter.server.mapper.UserMapper;
 import com.letter.server.service.exception.ServiceException;
@@ -32,44 +34,73 @@ public class MessageService {
 
     private final UserService userService;
 
-    private final Validator<MessageDto> messageValidator;
+    private final Validator<DetailedMessage> messageValidator;
 
-    private final Validator<UserDto> userValidator;
+    private final Validator<DetailedUser> detailedUserValidator;
 
-    public List<MessageDto> findAllByTwoUsers(UserDto firstUserDto, UserDto secondUserDto) throws ServiceException {
+    private final Validator<User> userValidator;
 
-        userValidator.validateId(firstUserDto);
-        userValidator.validateId(secondUserDto);
+    public List<DetailedMessage> findAllByTwoUsers(DetailedUser firstDetailedUser, DetailedUser secondDetailedUser) throws ServiceException {
 
-        List<MessageDto> responseList;
+        detailedUserValidator.validateId(firstDetailedUser);
+        detailedUserValidator.validateId(secondDetailedUser);
+
+        List<DetailedMessage> responseList;
 
         try {
-            firstUserDto = userService.findById(firstUserDto);
-            secondUserDto = userService.findById(secondUserDto);
+            firstDetailedUser = userService.findByIdDetailed(firstDetailedUser.getId());
+            secondDetailedUser = userService.findByIdDetailed(secondDetailedUser.getId());
 
-            UserEntity firstUserEntity = userMapper.userDtoToEntity(firstUserDto);
-            UserEntity secondUserEntity = userMapper.userDtoToEntity(secondUserDto);
+            UserEntity firstUserEntity = userMapper.userDtoDetailedToEntity(firstDetailedUser);
+            UserEntity secondUserEntity = userMapper.userDtoDetailedToEntity(secondDetailedUser);
 
             List<MessageEntity> messageEntities = messageRepository.findAllByUsers(firstUserEntity, secondUserEntity);
 
             responseList = messageEntities.stream()
-                    .map(messageMapper::messageEntityToDto)
+                    .map(messageMapper::messageEntityToDetailedMessage)
                     .filter(message -> !message.getStatus().equals(Status.DELETED.getValue()))
                     .collect(Collectors.toList());
         } catch (Exception ex) {
-            throw new ServiceException("Exception while finding messages by user ids=[" + firstUserDto.getId() + ", " + secondUserDto.getId() + "]", ex);
+            throw new ServiceException("Exception while finding messages by user ids=[" + firstDetailedUser.getId() + ", " + secondDetailedUser.getId() + "]", ex);
         }
 
         return responseList;
     }
 
-    public MessageDto findById(Long id) throws ServiceException {
-        MessageDto response;
+    public List<Message> findAllByTwoUsers(User firstUser, User secondUser) throws ServiceException {
+
+        userValidator.validateId(firstUser);
+        userValidator.validateId(secondUser);
+
+        List<Message> responseList;
+
+        try {
+            firstUser = userService.findById(firstUser.getId());
+            secondUser = userService.findById(secondUser.getId());
+
+            UserEntity firstUserEntity = userMapper.userDtoToEntity(firstUser);
+            UserEntity secondUserEntity = userMapper.userDtoToEntity(secondUser);
+
+            List<MessageEntity> messageEntities = messageRepository.findAllByUsers(firstUserEntity, secondUserEntity);
+
+            responseList = messageEntities.stream()
+                    .map(messageMapper::messageEntityToMessage)
+                    .filter(message -> !message.getStatus().equals(Status.DELETED.getValue()))
+                    .collect(Collectors.toList());
+        } catch (Exception ex) {
+            throw new ServiceException("Exception while finding messages by user ids=[" + firstUser.getId() + ", " + secondUser.getId() + "]", ex);
+        }
+
+        return responseList;
+    }
+
+    public DetailedMessage findById(Long id) throws ServiceException {
+        DetailedMessage response;
 
         try {
             MessageEntity messageEntity = messageRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-            response = messageMapper.messageEntityToDto(messageEntity);
+            response = messageMapper.messageEntityToDetailedMessage(messageEntity);
         } catch (Exception ex) {
             throw new ServiceException("Exception while sending message, id=" + id, ex);
         }
@@ -77,81 +108,99 @@ public class MessageService {
         return response;
     }
 
-    public MessageDto send(MessageDto messageDto) throws ServiceException {
+    public DetailedMessage sendDetailed(DetailedMessage detailedMessage) throws ServiceException {
 
-        messageValidator.validate(messageDto);
+        messageValidator.validate(detailedMessage);
 
-        MessageDto response;
+        DetailedMessage response;
 
         try {
-            MessageEntity messageEntity = messageMapper.messageDtoToEntity(messageDto);
+            MessageEntity messageEntity = messageMapper.detailedMessageToMessageEntity(detailedMessage);
             messageEntity.setStatus(Status.SENT);
 
             messageEntity = messageRepository.save(messageEntity);
 
-            response = messageMapper.messageEntityToDto(messageEntity);
+            response = messageMapper.messageEntityToDetailedMessage(messageEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while sending message, sender=" + messageDto.getSender() + ", recipient=" + messageDto.getRecipient(), ex);
+            throw new ServiceException("Exception while sending message, sender=" + detailedMessage.getSender() + ", recipient=" + detailedMessage.getRecipient(), ex);
         }
 
         return response;
     }
 
-    public MessageDto read(MessageDto messageDto) throws ServiceException {
+    public Message send(Message message) throws ServiceException {
 
-        messageValidator.validateId(messageDto);
-
-        MessageDto response;
+        Message response;
 
         try {
-            MessageEntity messageEntity = messageRepository.findById(messageDto.getId()).orElseThrow(EntityNotFoundException::new);
+            MessageEntity messageEntity = messageMapper.messageToMessageEntity(message);
+            messageEntity.setStatus(Status.SENT);
+
+            messageEntity = messageRepository.save(messageEntity);
+
+            response = messageMapper.messageEntityToMessage(messageEntity);
+        } catch (Exception ex) {
+            throw new ServiceException("Exception while sending message, sender=" + message.getSenderId() + ", recipient=" + message.getRecipientId(), ex);
+        }
+
+        return response;
+    }
+
+    public DetailedMessage read(DetailedMessage detailedMessage) throws ServiceException {
+
+        messageValidator.validateId(detailedMessage);
+
+        DetailedMessage response;
+
+        try {
+            MessageEntity messageEntity = messageRepository.findById(detailedMessage.getId()).orElseThrow(EntityNotFoundException::new);
             messageEntity.setIsRead(true);
 
             messageEntity = messageRepository.save(messageEntity);
 
-            response = messageMapper.messageEntityToDto(messageEntity);
+            response = messageMapper.messageEntityToDetailedMessage(messageEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while reading message, id=" + messageDto.getId(), ex);
+            throw new ServiceException("Exception while reading message, id=" + detailedMessage.getId(), ex);
         }
 
         return response;
     }
 
-    public MessageDto edit(MessageDto messageDto) throws ServiceException {
+    public DetailedMessage edit(DetailedMessage detailedMessage) throws ServiceException {
 
-        messageValidator.validateId(messageDto);
+        messageValidator.validateId(detailedMessage);
 
-        MessageDto response;
+        DetailedMessage response;
 
         try {
-            MessageEntity messageEntity = messageRepository.findById(messageDto.getId()).orElseThrow(EntityNotFoundException::new);
+            MessageEntity messageEntity = messageRepository.findById(detailedMessage.getId()).orElseThrow(EntityNotFoundException::new);
 
-            MessageEntity toSave = messageMapper.editMessageDtoToEntity(messageEntity, messageDto);
+            MessageEntity toSave = messageMapper.editMessageDtoToEntity(messageEntity, detailedMessage);
 
             toSave.setModifyTime(OffsetDateTime.now());
             toSave.setStatus(Status.EDITED);
 
             messageEntity = messageRepository.save(toSave);
 
-            response = messageMapper.messageEntityToDto(messageEntity);
+            response = messageMapper.messageEntityToDetailedMessage(messageEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while editing message, id=" + messageDto.getId(), ex);
+            throw new ServiceException("Exception while editing message, id=" + detailedMessage.getId(), ex);
         }
 
         return response;
     }
 
-    public void delete(MessageDto messageDto) throws ServiceException {
+    public void delete(DetailedMessage detailedMessage) throws ServiceException {
 
-        messageValidator.validateId(messageDto);
+        messageValidator.validateId(detailedMessage);
 
         try {
-            MessageEntity messageEntity = messageRepository.findById(messageDto.getId()).orElseThrow(EntityNotFoundException::new);
+            MessageEntity messageEntity = messageRepository.findById(detailedMessage.getId()).orElseThrow(EntityNotFoundException::new);
             messageEntity.setStatus(Status.DELETED);
 
             messageRepository.save(messageEntity);
         } catch (Exception ex) {
-            throw new ServiceException("Exception while deleting message, id=" + messageDto.getId(), ex);
+            throw new ServiceException("Exception while deleting message, id=" + detailedMessage.getId(), ex);
         }
     }
 }

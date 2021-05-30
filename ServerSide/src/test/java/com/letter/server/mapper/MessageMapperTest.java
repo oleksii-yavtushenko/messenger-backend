@@ -4,9 +4,9 @@ import com.letter.server.dao.entity.MessageEntity;
 import com.letter.server.dao.entity.OnlineStatusEntity;
 import com.letter.server.dao.entity.Status;
 import com.letter.server.dao.entity.UserEntity;
-import com.letter.server.dto.MessageDto;
+import com.letter.server.dto.DetailedMessage;
+import com.letter.server.dto.DetailedUser;
 import com.letter.server.dto.OnlineStatusDto;
-import com.letter.server.dto.UserDto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class MessageMapperTest {
 
     private static MessageEntity messageEntity;
 
-    private static MessageDto messageDto;
+    private static DetailedMessage detailedMessage;
 
 
     @BeforeAll
@@ -36,7 +36,7 @@ public class MessageMapperTest {
                 .password("pass")
                 .build();
 
-        UserDto senderDto = UserDto.builder()
+        DetailedUser senderDto = DetailedUser.detailedUserBuilder()
                 .id(1L)
                 .login("login")
                 .email("log@email.com")
@@ -67,7 +67,7 @@ public class MessageMapperTest {
                 .password("pass")
                 .build();
 
-        UserDto recipientDto = UserDto.builder()
+        DetailedUser recipientDto = DetailedUser.detailedUserBuilder()
                 .id(2L)
                 .login("login2")
                 .email("log2@email.com")
@@ -102,7 +102,7 @@ public class MessageMapperTest {
                 .isRead(false)
                 .build();
 
-        messageDto = MessageDto.builder()
+        detailedMessage = DetailedMessage.builder()
                 .id(1L)
                 .messageText("Hello!")
                 .createTime(OffsetDateTime.now())
@@ -116,34 +116,34 @@ public class MessageMapperTest {
 
     @Test
     public void messageEntityToDto_ShouldMapCorrectly() {
-        MessageEntity actual = messageMapper.messageDtoToEntity(messageDto);
+        MessageEntity actual = messageMapper.detailedMessageToMessageEntity(detailedMessage);
 
-        assertEquals(messageDto.getId(), actual.getId());
-        assertEquals(messageDto.getMessageText(), actual.getMessageText());
-        assertEquals(messageDto.getCreateTime(), actual.getCreateTime());
-        assertEquals(messageDto.getModifyTime(), actual.getModifyTime());
-        assertEquals(messageDto.getStatus(), actual.getStatus().getValue());
-        assertEquals(messageDto.getSender().getId(), actual.getSender().getId());
-        assertEquals(messageDto.getSender().getLogin(), actual.getSender().getLogin());
-        assertEquals(messageDto.getSender().getEmail(), actual.getSender().getEmail());
-        assertEquals(messageDto.getSender().getPassword(), actual.getSender().getPassword());
-        assertEquals(messageDto.getSender().getOnlineStatus().getId(), actual.getSender().getOnlineStatus().getId());
-        assertEquals(messageDto.getSender().getOnlineStatus().getIsOnline(), actual.getSender().getOnlineStatus().getIsOnline());
-        assertEquals(messageDto.getSender().getOnlineStatus().getUserId(), actual.getSender().getOnlineStatus().getUser().getId());
-        assertEquals(messageDto.getSender().getOnlineStatus().getLastOnlineTime(), actual.getSender().getOnlineStatus().getLastOnlineTime());
-        assertEquals(messageDto.getRecipient().getId(), actual.getRecipient().getId());
-        assertEquals(messageDto.getRecipient().getLogin(), actual.getRecipient().getLogin());
-        assertEquals(messageDto.getRecipient().getEmail(), actual.getRecipient().getEmail());
-        assertEquals(messageDto.getRecipient().getPassword(), actual.getRecipient().getPassword());
-        assertEquals(messageDto.getRecipient().getOnlineStatus().getId(), actual.getRecipient().getOnlineStatus().getId());
-        assertEquals(messageDto.getRecipient().getOnlineStatus().getIsOnline(), actual.getRecipient().getOnlineStatus().getIsOnline());
-        assertEquals(messageDto.getRecipient().getOnlineStatus().getUserId(), actual.getRecipient().getOnlineStatus().getUser().getId());
-        assertEquals(messageDto.getRecipient().getOnlineStatus().getLastOnlineTime(), actual.getRecipient().getOnlineStatus().getLastOnlineTime());
+        assertEquals(detailedMessage.getId(), actual.getId());
+        assertEquals(detailedMessage.getMessageText(), actual.getMessageText());
+        assertEquals(detailedMessage.getCreateTime(), actual.getCreateTime());
+        assertEquals(detailedMessage.getModifyTime(), actual.getModifyTime());
+        assertEquals(detailedMessage.getStatus(), actual.getStatus().getValue());
+        assertEquals(detailedMessage.getSender().getId(), actual.getSender().getId());
+        assertEquals(detailedMessage.getSender().getLogin(), actual.getSender().getLogin());
+        assertEquals(detailedMessage.getSender().getEmail(), actual.getSender().getEmail());
+        assertEquals(detailedMessage.getSender().getPassword(), actual.getSender().getPassword());
+        assertEquals(detailedMessage.getSender().getOnlineStatus().getId(), actual.getSender().getOnlineStatus().getId());
+        assertEquals(detailedMessage.getSender().getOnlineStatus().getIsOnline(), actual.getSender().getOnlineStatus().getIsOnline());
+        assertEquals(detailedMessage.getSender().getOnlineStatus().getUserId(), actual.getSender().getOnlineStatus().getUser().getId());
+        assertEquals(detailedMessage.getSender().getOnlineStatus().getLastOnlineTime(), actual.getSender().getOnlineStatus().getLastOnlineTime());
+        assertEquals(detailedMessage.getRecipient().getId(), actual.getRecipient().getId());
+        assertEquals(detailedMessage.getRecipient().getLogin(), actual.getRecipient().getLogin());
+        assertEquals(detailedMessage.getRecipient().getEmail(), actual.getRecipient().getEmail());
+        assertEquals(detailedMessage.getRecipient().getPassword(), actual.getRecipient().getPassword());
+        assertEquals(detailedMessage.getRecipient().getOnlineStatus().getId(), actual.getRecipient().getOnlineStatus().getId());
+        assertEquals(detailedMessage.getRecipient().getOnlineStatus().getIsOnline(), actual.getRecipient().getOnlineStatus().getIsOnline());
+        assertEquals(detailedMessage.getRecipient().getOnlineStatus().getUserId(), actual.getRecipient().getOnlineStatus().getUser().getId());
+        assertEquals(detailedMessage.getRecipient().getOnlineStatus().getLastOnlineTime(), actual.getRecipient().getOnlineStatus().getLastOnlineTime());
     }
 
     @Test
     public void messageDtoToEntity_ShouldMapCorrectly() {
-        MessageDto actual = messageMapper.messageEntityToDto(messageEntity);
+        DetailedMessage actual = messageMapper.messageEntityToDetailedMessage(messageEntity);
 
         assertEquals(messageEntity.getId(), actual.getId());
         assertEquals(messageEntity.getMessageText(), actual.getMessageText());

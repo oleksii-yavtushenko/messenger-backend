@@ -1,7 +1,8 @@
 package com.letter.server.controller;
 
 import com.letter.server.dao.entity.UserEntity;
-import com.letter.server.dto.UserDto;
+import com.letter.server.dto.ResponseWrapper;
+import com.letter.server.dto.DetailedUser;
 import com.letter.server.jwt.JwtTokenUtil;
 import com.letter.server.mapper.UserMapper;
 import com.letter.server.service.LoginService;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class LoginController {
 
-
     private final LoginService loginService;
 
     private final JwtTokenUtil jwtTokenUtil;
@@ -33,15 +33,15 @@ public class LoginController {
     private final UserMapper userMapper;
 
     @PostMapping
-    public ResponseEntity<UserDto> logIn(@RequestBody UserDto userDto) {
-        log.info("Logging in user, login={}", userDto.getLogin());
+    public ResponseEntity<ResponseWrapper<DetailedUser>> logIn(@RequestBody DetailedUser detailedUser) {
+        log.info("Logging in user, login={}", detailedUser.getLogin());
 
         UserEntity user;
 
         try {
-            user = loginService.logIn(userDto);
+            user = loginService.logIn(detailedUser);
 
-            UserDto userResponse = userMapper.userEntityToDto(user);
+            DetailedUser userResponse = userMapper.userEntityToDtoDetailed(user);
 
             userResponse.setAuthorizationToken(jwtTokenUtil.generateAccessToken(user));
 
@@ -49,15 +49,15 @@ public class LoginController {
 
             return ResponseEntity
                     .ok().header(HttpHeaders.AUTHORIZATION, userResponse.getAuthorizationToken())
-                    .body(userResponse);
+                    .body(new ResponseWrapper<>(userResponse));
 
         } catch (ServiceException ex) {
             if (ex instanceof LoginException || ex instanceof ValidationException) {
-                log.error("User cannot be logged in, login={}, cause={}", userDto.getLogin(), ex.getMessage(), ex.getCause());
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userDto);
+                log.error("User cannot be logged in, login={}, cause={}", detailedUser.getLogin(), ex.getMessage(), ex.getCause());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseWrapper<>(detailedUser));
             }
-            log.error("Exception while logging in user, login={}", userDto.getLogin(), ex);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userDto);
+            log.error("Exception while logging in user, login={}", detailedUser.getLogin(), ex);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(detailedUser));
         }
     }
 }

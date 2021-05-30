@@ -5,24 +5,18 @@ import lombok.*;
 import java.io.Serializable;
 
 @Data
-@Builder
+@Builder(builderMethodName = "userBuilder")
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto implements Serializable {
+public class User implements Serializable {
 
     private Long id;
 
-    private OnlineStatusDto onlineStatus;
-
     private String login;
 
-    private String password;
-
     private String email;
-
-    private boolean enabled;
 
     private String authorizationToken;
 }
